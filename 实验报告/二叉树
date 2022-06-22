@@ -1,0 +1,229 @@
+//
+// Created by 86178 on 2022/5/6.
+//
+#include "iostream"
+using namespace std;
+#include<stdio.h>
+#include<stdlib.h>
+#define OK 1
+#define ERROR 0
+#define OVERFLOW -1
+#define TRUE 1
+#define FALSE 0
+#define MAXSIZE 100
+#define STACKINCREMENT 10
+typedef int Status;
+typedef float TElemType;
+//二叉树的二叉链表存储结构定义
+typedef struct BiTNode{
+    char data;
+    struct BiTNode *lchild,*rchild;
+}BiTNode,*BiTree;
+//顺序栈的存储结构
+typedef BiTree SElemType;
+typedef struct
+{
+    SElemType *base;  //栈底指针
+    SElemType *top;  //栈顶指针
+    int stacksize;    //栈最大可用容量
+}SqStack;
+//创建二叉树
+void InitBiTree(BiTree &T)
+{
+    T=NULL;
+}
+//因为创建的时候就是从无到有，所以不需要InitBiTree()
+//先序遍历的顺序创建二叉树
+Status CreateBiTree(BiTree &T)
+{
+    char ch;
+    ch = getchar();
+    if (ch == '#') T = NULL;
+    else
+    {
+        if (!(T = (BiTree)malloc(sizeof(BiTNode))))  exit(OVERFLOW);
+        T->data = ch;              // 生成根结点
+        CreateBiTree(T->lchild);      // 构造左子树
+        CreateBiTree(T->rchild);      // 构造右子树
+    }
+    return OK;
+}
+/*遍历二叉树*/
+//前序遍历
+void PreOrderTraverse(BiTree T)
+{
+    if(T){
+        printf("%c ",T->data);
+        PreOrderTraverse(T->lchild);
+        PreOrderTraverse(T->rchild);
+    }
+}
+//51ye 非递归
+//中序遍历
+void InOderTraverse(BiTree T)
+{
+    if(T){
+        InOderTraverse(T->lchild);
+        printf("%c ",T->data);
+        InOderTraverse(T->rchild);
+    }
+}
+//后序遍历
+void PostOrderTraverse(BiTree T)
+{
+    if(T){
+        PostOrderTraverse(T->lchild);
+        PostOrderTraverse(T->rchild);
+        printf("%c ",T->data);
+    }
+}
+//中序遍历的非递归遍历
+Status InitStack(SqStack &S)
+{//构造一个空栈
+    S.base= new SElemType[MAXSIZE];  //为顺序栈动态分配一个最大容为MAXSIZE的数组空间
+    //  或者这样写
+    // S.base = (TElemType *)malloc(MAXSIZE * sizeof (TElemType));
+    if (!S.base)  exit(OVERFLOW);   //储存分配失败
+    S.top=S.base;   //top初始为base，空栈
+    S.stacksize=MAXSIZE;  //stacksize置为栈的最大容量MAXSIZE
+    //if(S.base) printf("置空栈成功\n");
+    return OK;
+}
+//入栈操作：在栈顶插入一个新的元素
+Status Push(SqStack &S, SElemType e)
+{//插入元素e为新的栈顶元素
+    if(S.top-S.base==S.stacksize)  return ERROR;     //栈满
+    if (S.top - S.base > S.stacksize)
+    {
+        S.base = (SElemType *)realloc(S.base, (S.stacksize + STACKINCREMENT) * sizeof(SElemType));
+        if (!S.base)
+        {
+            printf("栈溢出!\n");
+            return OVERFLOW;
+        }
+        S.top = S.base + S.stacksize;
+        S.stacksize += STACKINCREMENT;
+    }//若栈满，追加存储空间
+    *S.top++ = e;   //元素e压入栈顶，栈顶指针+1
+    /*上面的句子本质
+      *S.top = e;
+      S.top++;*/
+    return OK;
+}
+//出栈操作：将栈顶元素删除
+Status Pop(SqStack &S,SElemType &e)
+{//删除S的栈顶元素，用e返回其值
+    if(S.base==S.top)   return ERROR;   //栈空
+    e=*(--S.top);   //栈顶指针减1，将栈顶元素给e
+    return OK;
+}
+
+//判断栈是否为空
+Status StackEmpty(SqStack S)
+{
+    if (S.top == S.base)
+        return TRUE;
+    else
+        return FALSE;
+}
+
+int inorder(BiTree T)
+{
+    SqStack S;
+    BiTree p=T;
+    InitStack(S);
+    while(p || !StackEmpty(S))
+    {
+        if(p) { Push(S,p); p = p->lchild; } //非空指针进栈，继续左进
+        else {
+            //上层指针退栈，访问其所指结点，再右进
+            Pop(S,p);
+            // if(!Visit(p->data)) return ERROR;
+            printf("%c ",p->data);
+            p=p->rchild;
+        }
+    }
+    return OK;
+}
+//层次遍历二叉树
+//层次遍历二叉树T的递归算法，对每个数据元素调用函数Visit，采用队列作为辅助结构
+Status LevelOrderTraverse(BiTree T, Status(*Visit)(char)) {
+    BiTNode *Queue[100], *p = T;
+    int front = 0, rear = 0;
+    if (p != NULL) {
+        Queue[++rear] = p;    /*   根结点入队  */
+        while (front < rear) {
+            p = Queue[++front];
+            Visit(p->data);
+            if (p->lchild != NULL)
+                Queue[++rear] = p->lchild;    /*   左结点入队  */
+            if (p->rchild != NULL)
+                Queue[++rear] = p->rchild;    /*   左结点入队  */
+        }
+        return OK;
+    }
+    return ERROR;
+}
+Status PrintBiTree(char e)
+{
+    printf("%c ",e);
+    return OK;
+}
+//统计叶子结点个数
+int CountLeafs(BiTree root) {
+    int sum=0;
+    if (root == NULL) {
+        return 0;
+    }
+    if (root->lchild == NULL && root->rchild == NULL) {
+        return 1;
+    }
+    sum = CountLeafs(root->lchild) + CountLeafs(root->rchild);
+    return sum;
+}
+int CountRoot(BiTree ROOT)
+{
+    if(ROOT ==NULL) return 0;
+    else return CountRoot(ROOT->rchild)+CountRoot(ROOT->lchild)+1;
+}
+
+//统计树的层次数
+/* 初始条件: 二叉树T存在。操作结果: 返回T的深度 */
+int CountLevels(BiTree T)
+{
+    if (T == NULL)
+        return 0;
+    int l = 0, r = 0;
+    if (T->lchild)
+        l = CountLevels(T->lchild);
+    if (T->rchild)
+        r = CountLevels(T->rchild);
+    return l > r ? l + 1 : r + 1;
+}
+
+int main()
+{
+    BiTree T;
+    int n = 0,b;
+    char s;
+    CreateBiTree(T);
+    cout<<"前序遍历递归\n";
+    PreOrderTraverse(T);
+    cout<<endl<<"中序遍历递归\n";
+    InOderTraverse(T);
+    cout<<endl<<"后序遍历递归\n";
+    PostOrderTraverse(T);
+    cout<<endl<<"中序非递归\n";
+    inorder(T);
+    cout<<endl<<"层次遍历";
+    LevelOrderTraverse(T, PrintBiTree);
+    cout<<endl<<"叶子结点个数 ";
+    n = CountLeafs(T);
+    cout<<n;
+    cout<<endl<<"树高度 ";
+    cout<<CountLevels(T);
+    cout<<endl<<"结点个数 ";
+    cout<<CountRoot(T);
+    return 0;
+}
+//abd#e##fg###c##
