@@ -1,0 +1,267 @@
+//
+// Created by 86178 on 2022/5/11.
+//
+//无向图
+#include<stdio.h>
+#include "stdlib.h"
+#include<malloc.h>
+#define OK 1
+#define ERROR 0
+#define OVERFLOW -1
+#define TRUE 1
+#define FALSE 0
+#define MVNum 100
+#define MAXSIZE 100
+#define INFINITY 32767  //表示无穷大
+typedef struct {
+    char vertex[MVNum];    //顶点信息
+    int arcs[MVNum][MVNum];  //边信息
+    int vex_num,arc_num;    //图当前的点数和边数
+}Mgraph;
+/*
+//链队列的存储结构
+typedef struct QNode{
+    char data;
+    struct QNode *next;
+}Qnode ,*QueuePtr;
+typedef struct{
+    QueuePtr front;//对头指针
+    QueuePtr rear;  //队尾指针
+}LinkQueue;
+//辅助队列Q的初始化
+int InitQueue(LinkQueue &Q)
+{  //构造一个空队列
+    Q.front = Q.rear = (QueuePtr) malloc(sizeof (QNode));
+    if(!Q.front) exit(OVERFLOW);
+    Q.front -> next = NULL;
+    return OK;
+}
+//链队列进队
+int EnQueue(LinkQueue &Q,char e){
+    Qnode *p = (QueuePtr) malloc(sizeof (QNode));
+    if(!p) exit(OVERFLOW);
+    p -> data = e;p -> next = NULL;
+    Q.rear -> next = p;
+    Q.rear = p;
+    return OK;
+}
+//判断队列是否为空
+int QueueEmpty(LinkQueue Q)
+{
+    return (Q.front == Q.rear );
+}
+//链队列出队
+int DeQueue(LinkQueue &Q,char e){
+    if(Q.front == Q.rear) return ERROR;
+    Qnode *p = Q.front -> next;
+    e = p -> data;
+    Q.front -> next = p ->next;
+    if(Q.rear == p ) Q.rear = Q.front;
+    free(p);
+    return OK;
+}
+//检查u的所有邻接点w，FirstAdjVex(G,u)
+int FirstAdjVex(Mgraph G,int v)
+{
+    for(int i = 1;i <= G.vex_num;i++)
+    {
+        if(G.arcs[v][i] != 0)
+            return i;
+    }
+    return 0;
+}
+
+int NextAdjVex(Mgraph G,int v,int w)
+{//在图mg中，求顶点v的相对于顶点w的下一个邻接点
+    for (int i = w + 1; i <= G.vex_num; i++)
+        if (G.arcs[v][i] != 0)
+            return i;
+    return 0;
+}
+*/
+struct Prim{
+    char adjvex;
+    int lowcoat;
+}closedge[20];
+typedef struct{
+    int *data;
+    int front;
+    int rear;
+}SqQueue;
+void InitQueue(SqQueue &Q)
+{
+    Q.data=(int *)malloc(sizeof(int)*MAXSIZE);
+    if(!Q.data) exit(-2);
+    Q.front=Q.rear=0;
+}
+int QueueEmpty(SqQueue Q)
+{
+    if(Q.front==Q.rear)
+        return 1;
+    else
+        return 0;
+}
+int EnQueue(SqQueue &Q,int e)
+{
+    if((Q.rear+1)%MAXSIZE==Q.front)
+        return 0;
+    Q.data[Q.rear]=e;
+    Q.rear=(Q.rear+1)%MAXSIZE;
+    return 1;
+}
+int DeQueue(SqQueue &Q,int &e)
+{
+    if (Q.front==Q.rear)
+        return 0;
+    e=Q.data[Q.front];
+    Q.front=(Q.front+1)%MAXSIZE;
+}
+//查找位置
+int LocateVex(Mgraph g,char v)
+{
+    int i;
+    for(i=0; i<g.vex_num; ++i)
+    {
+        if(g.vertex[i]==v)
+            return i;
+    }
+    return -1;
+}
+//图的创建
+void creat_UDG(Mgraph &g)
+{
+    int i,j,k;
+    char v1,v2;
+    int cost;
+    printf("请输入顶点个数，边的个数：\n");
+    scanf("%d,%d",&g.vex_num,&g.arc_num);
+    getchar();  //吃掉垃圾字符
+    printf("请输入顶点信息：\n");
+    //构造顶点向量
+    for(i = 0; i< g.vex_num ; ++i)
+    {
+        scanf("%c",&g.vertex[i]);
+        getchar();
+    }
+    //初始化邻接矩阵
+    for(i=0; i<g.vex_num; ++i)
+        for(j=0; j<g.vex_num;++j)
+            g.arcs[i][j] = INFINITY;
+        printf("请输入边的信息：\n");
+        //构造邻接矩阵
+        for(k=0; k<g.arc_num; ++k)
+        {
+            //输入一条边依附的顶点
+            scanf("%c,%c,%d",&v1,&v2,&cost);
+            getchar();
+            //确定v1和v2在G中的位置
+            i = LocateVex(g,v1);
+            j = LocateVex(g,v2);
+            if(i == -1 || j == -1)  return;
+            g.arcs[i][j] = cost;
+            g.arcs[j][i] = g.arcs[i][j];
+        }
+}
+//图的深度搜索遍历
+bool vistit[MVNum];
+char DFS(Mgraph G,int v)//这里的v是输入结点的序号
+{
+    printf("%d ",v);
+    vistit[v] = true;
+    int w;
+    printf("%c ",G.vertex[v]) ;
+    for(w=0;w<G.vex_num;w++)
+        if((G.arcs[v][w] != 0)&&(!vistit[w])&&G.arcs[v][w] != 32767) DFS(G,w);
+}
+//图的广度搜索遍历
+void BFS(Mgraph G)
+{
+    SqQueue Q;
+    char e;
+    InitQueue(Q);
+    for(int i = 0; i < G.vex_num;i++)
+    {
+        vistit[i] = false;
+    }
+    for(int i = 0;i<G.vex_num;i++) {
+        if (!vistit[i]) {
+            vistit[i]  = true;
+            printf("%c ",G.vertex[i]);
+            EnQueue(Q, e);
+            while(!QueueEmpty(Q))
+            {
+                DeQueue(Q,i);
+                for(int j = 0;j<G.vex_num;j++) {
+                    if (G.arcs[i][j] != INFINITY && !vistit[j]) {
+                        vistit[j] = true;
+                        printf("%c ", G.vertex[j]);
+                        EnQueue(Q, j);
+                    }
+                }
+            }
+        }
+    }
+}
+//图的显示算法函数
+void out_UDG(Mgraph g)
+{
+    int i,j;
+    printf("图的顶点是：\n");
+    for(i=0; i<g.vex_num;i++)
+    {
+        printf("%8c",g.vertex[i]);
+    }
+    printf("\n");
+    printf("图的邻接矩阵是：\n");
+    for(i=0; i<g.vex_num; i++)
+    {
+        for(j=0; j<g.vex_num; j++)
+            /*if(g.arcs[i][j]==32767) printf("\t∞");
+            else printf("\t%d", g.arcs[i][j]);
+            printf("\n");*/
+            printf("%8d",g.arcs[i][j]);
+            printf("\n");
+    }
+}
+
+
+int main()
+{
+    Mgraph g;
+    int x;
+    creat_UDG(g);
+    out_UDG(g);
+    printf("图的深度优先遍历\n");
+    printf("输入从某节点遍历的序号");
+    puts("");
+    scanf("%d",&x);
+    DFS(g,x);
+    puts("");
+    printf("广度优先遍历");
+    puts("");
+    BFS(g);
+
+
+    return 0;
+}
+//测试数据
+/*a,b,19
+a,e,14
+a,g,18
+b,c,5
+b,d,7
+b,e,12
+c,d,3
+d,e,8
+d,f,21
+e,g,16
+f,g,27
+7,11
+a
+b
+c
+d
+e
+f
+g
+ */
