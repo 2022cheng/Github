@@ -1,0 +1,134 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define OK 1
+#define ERROR 0
+#define LIST_INIT_SIZE 100
+#define LISTINCREAMENT 10
+
+typedef int Status;
+typedef float ElemType;
+typedef struct
+{
+    ElemType  *elem; //指向线性表占用的数组空间
+    int length; //线性表的长度
+    int listsize;   //前分配的存储容量(以sizeof(ElemType)为单位)
+}SqList;
+
+//构造一个空的线性表
+Status InitList_Sq(SqList &L)
+{
+    L.elem=(ElemType *)malloc(LIST_INIT_SIZE*sizeof (ElemType ));
+    L.length=0;
+    L.listsize=LIST_INIT_SIZE; //初始储存存容量
+}
+//线性表的顺序表插入操作
+Status ListInsert_Sq(SqList &L,int i ,ElemType e){
+    int j;
+    if(i<1 || i>L.length+1) return ERROR;	         //i值不合法
+    if(L.length==L.listsize) return ERROR;    //当前存储空间已满
+    for(j=L.length-1;j>=i-1;j--)
+        L.elem[j+1]=L.elem[j];    //插入位置及之后的元素后移
+    L.elem[i-1]=e;                     //将新元素e放入第i个位置
+    ++L.length;		     	//表长增1
+    return OK;
+}
+//线性表的顺序表删除操作
+Status ListDelete_Sq(SqList &L,int i){
+    int j;
+    if((i<1)||(i>L.length)) return ERROR;	 //i值不合法
+
+    for (j=i;j<=L.length-1;j++)
+        L.elem[j-1]=L.elem[j];  	 //被删除元素之后的元素前移
+    --L.length;               	      //表长减1
+    return OK;
+}
+//取值（根据位置i获取相应位置数据元素的内容）
+int GetElem(SqList L,int i,ElemType &e)
+{
+    if (i<1||i>L.length) return ERROR;
+    //判断i值是否合理，若不合理，返回ERROR
+    e=L.elem[i-1];   //第i-1的单元存储着第i个数据
+    return OK;
+}
+//查找（根据指定数据获取数据所在的位置)
+int LocateElem_Sq(SqList L, ElemType e)
+{ // 在顺序表中查询第一个满足判定条件的数据元素，
+// 若存在，则返回它的位序，否则返回 0
+    int i ; // i 的初值为第 1 元素的位序
+    i= 1;
+    while (i <= L.length && L.elem[i-1]!=e)
+        ++i;
+    if (i <= L.length)  return i;
+    else  return 0;
+}
+//有序排序合并
+void MergeList(SqList La,SqList Lb,SqList &Lc)
+{
+    ElemType *pa = La.elem;
+    ElemType *pb = Lb.elem;
+    ElemType *pc;
+    Lc.listsize=La.length+Lb.length;
+    Lc.length=La.length+Lb.length;
+    pc=Lc.elem=(ElemType*)malloc(Lc.listsize*sizeof(ElemType));
+    if(!Lc.elem) {
+        const int OVERFIOW = 0;
+        exit(OVERFIOW);
+    }
+    ElemType *pa_last=La.elem+La.length-1;
+    ElemType *pb_last=Lb.elem+Lb.length-1;
+    while(pa<=pa_last&&pb<=pb_last)
+    {
+        if(*pa<=*pb)   *pc++=*pa++;
+        else      *pc++=*pb++;
+    }
+    while(pa<=pa_last)  *pc++=*pa++;
+    while(pb<=pb_last)  *pc++=*pb++;
+}
+int main()
+{
+    SqList L;
+    int i,loc;
+    ElemType x,y;
+//
+    InitList_Sq(L);
+    for(i=1;i<=10;i++)
+    {
+        scanf("%f",&x);
+        ListInsert_Sq(L,i,x);
+    }
+    for(i=1;i<=L.length;i++)
+        printf("%5.1f",L.elem[i-1]);
+    printf("\n");
+//
+    ListDelete_Sq(L,3);
+    for(i=1;i<=L.length;i++)
+        printf("%5.1f",L.elem[i-1]);
+    printf("\n");
+//
+    GetElem(L,5,y);
+    printf("y=%5.1f\n",y);
+//
+    loc=LocateElem_Sq(L,9);
+    if(loc!=0)
+        printf("Loc=%d\n",loc);
+    else printf("loc is not defind");
+//
+    SqList T1,T2,T3;
+    InitList_Sq(T1);
+    InitList_Sq(T2);
+    InitList_Sq(T3);
+    for(i=1;i<=3;i++)
+    {
+        scanf("%f",&x);
+        ListInsert_Sq(T1,i,x);
+    }
+    for(i=1;i<=4;i++)
+    {
+        scanf("%f",&y);
+        ListInsert_Sq(T2,i,y);
+    }
+    MergeList(T1,T2,T3);
+    for(i=0;i<=6;i++)
+        printf("%f ",T3.elem[i]);
+    return 0;
+}
