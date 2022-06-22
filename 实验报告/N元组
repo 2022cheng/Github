@@ -1,0 +1,135 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include "stdbool.h"
+#define OK 1
+#define  ERROR 0
+#define N 3  //开辟N四个字符空间,实现N元组
+typedef int Status;
+typedef float ElemType;
+typedef ElemType *Triplet;  //给ElemType类型的指针类型起别名Triplet
+
+//N元组的初始化
+Status initTriplet(Triplet &T,ElemType v[])
+{
+    //动态内存分配
+    T=(ElemType *)malloc(sizeof (ElemType) * N);
+    if(!T) exit(-2);
+    int i;
+    for(i=0;i<N;i++)
+    {
+        T[i]=v[i];
+    }
+}
+//输出N元组
+Status printTriple(Triplet T)
+{
+    int i;
+    for(i=0;i<N;i++)
+    {
+        printf("%.1f\t",T[i]);
+    }
+    printf("\n");
+}
+Status getELem(Triplet T,int i,ElemType &e)
+{
+    if (i < 1 || i > N)   //先判断是否超出了给定的空间
+        return ERROR;
+    else  e=T[i-1];
+    return  OK;
+}
+Status putElem(Triplet &T,int i,ElemType e)
+{
+    if (i < 1 || i > 3)
+        return ERROR;
+    else    T[i-1]=e;
+    return OK;
+}
+Status getMax(Triplet T,ElemType &max)
+{
+    int i;
+    max=T[0];
+    for(i=1;i<N;i++)
+        if(T[i]>max) max=T[i];
+    return max;
+}
+//getMin 于此同理
+Status getMin(Triplet &T,ElemType &min)
+{
+    int i;
+    min=T[0];
+    for(i=1;i<=N;i++)
+        if(T[i]<min) min=T[i];
+    return min;
+}
+void destroyTriplet(Triplet &T)
+{
+    free(T); // 第三空
+    printf("分配内存已释放！");
+    exit(0);
+}
+Status add(Triplet T1,Triplet T2)
+{
+    int i;
+    for(i=0;i<N;i++)
+        T2[i]+=T1[i];
+}
+Status mulCoef(Triplet &T1,float coef)
+{
+    for(int i=0;i<N;i++)
+        T1[i]*=coef;
+}
+Status isAscending(Triplet T)
+{
+    return (T[0]<=T[1])&&(T[1]<=T[2]);
+}
+Status isDscending(Triplet T)
+{
+    return (T[0]>=T[1])&&(T[1]>=T[2]);
+}
+
+int main()
+{
+    Triplet T1, T2;
+    int funNum, i;
+    ElemType v[N], e, flag, coef;
+    printf("请输入N元组的每个元素(N=%d)\n", N);
+    for (i = 0; i < N; i++)
+        scanf("%f", &v[i]);
+    initTriplet(T1, v);
+    printf("初始化好的N元组为：\n");
+    printTriple(T1);
+    printf("请输入要获取的第几个元素的值：\n");
+    scanf("%d", &i);
+    getELem(T1, i, e);
+    printf("第%d个元素的值为%.1f\n",i,e);
+    printf("请输入要改变的位置和更改的值：\n");
+    scanf("%d%f", &i, &e);
+    putElem(T1, i, e);
+    printf("新的N元组为：\n");
+    printTriple(T1);
+    flag = isAscending(T1);
+    if (flag == 1) printf("升序排序\n");
+    else printf("非升序排列\n");
+    flag = isDscending(T1);
+    if (flag == 1) printf("降序排列\n");
+    else printf("非降序排列\n");
+    getMax(T1, e);
+    printf("最大值为%.1f\n", e);
+    getMin(T1, e);
+    printf("最小值为%.1f\n", e);
+    printf("请输入另一个N元组的每个元素（N=%d)\n", N);
+    for(i=0;i<N;i++)
+        scanf("%f",&v[i]);
+    initTriplet(T2,v);
+    add(T1,T2);
+    printf("相加之后的N(N=%d)元组为：\n",N) ;
+    printTriple(T2);
+    printf("请输入所乘系数\n");
+    scanf("%f", &coef);
+    mulCoef(T1, coef);
+    printf("没项乘系数后的N元组为;\n");
+    printTriple(T1);
+    destroyTriplet(T1);
+    destroyTriplet(T2);
+    return 0;
+}
