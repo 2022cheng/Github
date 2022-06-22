@@ -1,0 +1,92 @@
+//栈的顺序表示和实现
+#include "iostream"
+#include "stdlib.h"
+#include "string.h"
+#include "stdio.h"
+#define OK 1
+#define OVERFLOW -1
+#define ERROR 0
+#define MAXSIZE 100
+#define INMAXSIZE 10
+using namespace std;
+typedef int Status;
+typedef float SElemType;
+//顺序栈的储存结构
+typedef struct
+{
+    SElemType *base;  //栈底指针
+    SElemType  *top;  //栈顶指针
+    int stacksize;    //栈最大可用容量
+}SqStack;
+
+//顺序栈的初始化
+/*为顺序分配一个大小为MAXSIZE的数组空间，base指向栈底，栈顶指针top初始为base
+ 表示栈为空，stacksize置为最大容量MAXSIZE*/
+Status InitStack(SqStack &S)
+{//构造一个空栈
+    S.base=new SElemType [MAXSIZE];  //为顺序栈动态分配一个最大容为MAXSIZE的数组空间
+    //  或者这样写
+    // S.base = (SElemType *)malloc(MAXSIZE * sizeof (SElemType));
+    if (!S.base)  exit(OVERFLOW);   //储存分配失败
+    S.top=S.base;   //top初始为base，空栈
+    S.stacksize=MAXSIZE;  //stacksize置为栈的最大容量MAXSIZE
+    if(S.base) printf("置空栈成功\n");
+    return OK;
+}
+//入栈操作：在栈顶插入一个新的元素
+Status Push(SqStack &S,SElemType e)
+{//插入元素e为新的栈顶元素
+    if(S.top-S.base==S.stacksize)  return ERROR;     //栈满
+    *S.top++ = e;   //元素e压入栈顶，栈顶指针+1
+    /*上面的句子本质
+      *S.top = e;
+      S.top++;*/
+    return OK;
+}
+//出栈操作：将栈顶元素删除
+Status Pop(SqStack &S,SElemType &e)
+{//删除S的栈顶元素，用e返回其值
+    if(S.base==S.top)   return ERROR;   //栈空
+    e=*--S.top;   //栈顶指针减1，将栈顶元素给e
+    return OK;
+}
+//取栈顶元素
+Status GetTop(SqStack S)
+{//返回S的值，不修改栈顶指针（没有用引用，仅仅将函数返回了要求的值，所以不会修改原本的栈顶指针）
+    if(S.top!=S.base)//栈非空
+        printf("%f\n",*(S.top-1));
+        return *(S.top-1);
+}
+Status OutputStack(SqStack S)
+{
+    if(S.top==S.base) return ERROR;
+    while(S.top!=S.base)
+    {
+        S.top--;
+        float m;
+        m=*S.top;
+        printf("%f ",m);
+    }
+    printf("\n");
+}
+int main()
+{
+    SqStack S;
+    SElemType x,e;
+    int n;
+    InitStack(S);
+    cout<<"入栈操作："<<endl;
+    scanf("%d",&n);   //要插入栈中的元素个数
+    for(int i=0;i<n;i++) {
+        scanf("%f", &x);
+        Push(S, x);
+    }
+    cout<<"该栈为："<<endl;
+    OutputStack(S);
+    printf("取栈顶元素：\n");
+    GetTop(S);
+    cout<<"出栈操作："<<endl;
+    Pop(S,e);
+    OutputStack(S);
+    return 0;
+}
