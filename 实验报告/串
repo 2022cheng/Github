@@ -1,0 +1,79 @@
+#include "stdio.h"
+#include "stdlib.h"
+#include<string.h>
+#include "stdbool.h"
+#define OK 1
+#define ERROR 0;
+#define OVERSIZE -1
+typedef int Status;
+typedef float ElemType;
+//-------穿的定长顺序储存结构------(静态分配)
+#define MAXSIZE 255    //串的最大长度
+typedef struct{
+    char ch[MAXSIZE+1];   //储存串的一维数组
+    int length;    //串的当前长度
+}SString;
+//-------串的堆式顺序存储结构------
+typedef struct {
+    char *ch;
+    int length;
+}HString;
+
+//------串的表示与实现操作------
+Status LenStr(SString *r)
+{
+    int i=0;
+    while(r->ch[i]!='\0'){
+        i++;
+    }
+    return i;
+}
+//串的连接
+Status Concat(SString &T,SString S1,SString S2)
+{//用T返回又S1和S2联接而成的的新串。若未截断，则返回TRUE，否则FALSE
+    int i;
+    char uncut,TURE,FALSE;
+    if(S1.length + S2.length <= MAXSIZE){
+        for(i=0;i<S1.length; i++)
+            T.ch[i]=S1.ch[i];
+        for(i= S1.length + 1; i < MAXSIZE; i++) {
+            for(int a=0;a<MAXSIZE-S1.length;a++)
+            T.ch[i] = S2.ch[a];
+        }
+    uncut = TURE;}
+    else if(S1.length + S2.length > MAXSIZE)
+    {
+        for(i=0;i<S1.length; i++)
+            T.ch[i]=S1.ch[i];
+        for(i= S1.length + 1; i < MAXSIZE; i++) {
+            for(int a=0;a<MAXSIZE-S1.length;a++)
+                T.ch[i] = S2.ch[a];
+        }
+    }  uncut = FALSE;
+        return uncut;
+}
+//求字串
+Status SubString(SString &Sub,SString S,int pos,int len)
+{//用Sub返回串S的第pos个字符长度为len的子串
+    //其中，1<=pos<=StrLength(S)且 0<=len<=StLength(S)-pos+1
+    int i;
+    if(pos<1||pos>S.length||len<0||len>S.length-pos+1)
+        return ERROR;
+    for(i=0;i<len;i++)
+    {
+        Sub.ch[i]=S.ch[pos+i];
+        Sub.length=len;
+    }
+    return OK;
+}
+int main()
+{
+    SString S1,S2;
+    SString *r=&S1;
+    r->ch[0];
+    printf("请输入一个字符串: ");
+    gets(r->ch);//使用get函数输入字符串 格式为 gets(字符串组名)
+    *r->ch=LenStr(r);
+
+    return 0;
+}
