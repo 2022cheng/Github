@@ -1,0 +1,71 @@
+#include<stdio.h>
+#include<string.h>
+#include<iostream>
+#include<algorithm>
+ 
+using namespace std;
+ 
+int n,m;
+int pre[1010],a[1010],b[1010];
+ 
+int Find(int x)//查找
+{
+    int r = x;
+    while(r != pre[r])
+        r = pre[r];
+    int i = x,j;
+    while(pre[i] != r)//路径压缩
+    {
+        j = pre[i];
+        pre[i] = r;
+        i = j;
+    }
+    return r;
+}
+ 
+void join(int x,int y)//合并
+{
+    int fx = Find(x);
+    int fy = Find(y);
+    if(fx != fy)
+        pre[fy] = fx;
+}
+ 
+int main()
+{
+    int t;
+    scanf("%d",&t);
+    while(t--)
+    {
+        memset(a,0,sizeof(a));
+        scanf("%d %d",&n,&m);
+        int x,y;
+        for(int i = 1;i <= n;i++)//初始化
+            pre[i] = i;
+        for(int i = 1;i <= m;i++)
+        {
+            scanf("%d %d",&x,&y);
+            a[x]++;
+            a[y]++;
+            join(x,y);
+        }
+        memset(b,0,sizeof(b));
+        int cont = 0;
+        for(int i = 1;i <= n;i++)
+        {
+            b[Find(i)] = 1;
+            cont += b[i];
+        }
+        int sum = 0;
+        for(int i = 1;i <= n;i++)//判断有多少个偶数度
+        {
+            if(a[i] % 2 == 0)
+                sum++;
+        }
+        if(cont == 1 && (sum == n || sum == n - 2))
+            printf("Yes\n");
+        else
+            printf("No\n");
+    }
+    return 0;
+}
