@@ -1,0 +1,112 @@
+//
+// Created by 86178 on 2022/6/1.
+//
+#include<iostream>
+#include "cstdio"
+#include<algorithm>
+#include<cstring>
+#include<malloc.h>
+#include<cstdlib>
+using namespace std;
+typedef int KeyType;
+typedef float InfoType;
+#define OK 1
+#define ERROR 0
+#define OVERFLOW -1
+#define MAXSIZE 100
+#define EQ(a,b) ((a)==(b))
+#define LT(a,b) ((a) <  (b))
+#define LQ(a,b) ((a)<=(b))
+using namespace std;
+const int N = 11;
+typedef struct{
+    KeyType key;
+    InfoType otherinfo;
+}ElemType;
+typedef struct{
+    ElemType *elem;
+    int length;
+    int listsize;
+}SSTable;
+int InitList_Sq(SSTable &L)
+{  //构造一个空的线性表
+    L.elem=(ElemType *)malloc(MAXSIZE*sizeof(ElemType));
+    if (! L.elem)  exit(0); //存储分配失败
+    L.length=0;  //空表长度为0
+    L.listsize = N; //初始存储容量
+    return OK;
+}
+//线性表的顺序表插入操作
+int  ListInsert_Sq(SSTable &L,int i ,ElemType e){
+    int j;
+    if(i<1 || i>L.length+1) return ERROR;             //i值不合法
+    if(L.length==L.listsize) return ERROR;
+    for(j=L.length-1;j>=i-1;j--)
+        L.elem[j+1]=L.elem[j];    //插入位置及之后的元素后移
+    L.elem[i-1] = e;                     //将新元素e放入第i个位置
+    ++L.length;                 //表长增1
+    return OK;
+}
+//普通顺序查找
+int Search_Seq(SSTable ST,float key)
+{
+    for(int i=ST.listsize;i>=1;--i)
+    {
+        //cout<<i<<endl;
+        if(ST.elem[i].key == key) return i;
+    }
+    return 0;
+}
+//设置监视哨的顺序查找
+int Search_sep(SSTable ST,float key)
+{
+    ST.elem[0].key = key;
+    for(int i = ST.length;ST.elem[i].key != key; --i )
+        if(ST.elem[i].key == key) return i;
+}
+//二分查找
+int Search_Bin(SSTable ST,KeyType key)
+{
+    int low = 1;
+    int high = ST.length;
+    int mid;
+    while(low <= high)
+    {
+        mid = low + high >> 1;
+        if(key == ST.elem[mid].key) return mid;
+        else if(key < ST.elem[mid].key) high = mid -1;
+        else low = mid + 1;
+    }
+    return 0;
+}
+
+int main()
+{
+    SSTable L;
+    int i;
+    int y,z,h;
+    ElemType x;
+    //创建顺序表
+    InitList_Sq(L);
+    for(i=1;i<=10;i++){
+        scanf("%d",&x);
+        ListInsert_Sq(L,i,x);
+    }
+    cout<<"创建的顺序表为"<<endl;
+    for(i=1;i<=L.length;i++)
+        printf("%d ",L.elem[i-1].key);
+    puts("");
+    cout<<"普通顺序查找(输入需要查找的数)"<<endl;
+    scanf("%d",&y);
+    int a = Search_Seq(L,y);
+    cout<<a<<endl<<"设置监视哨的顺序查找(输入需要查找的数)"<<endl;
+    scanf("%d",&z);
+    int b = Search_sep(L,z);
+    cout<<b<<endl;
+    puts("二分查找");
+    scanf("%d",&h);
+    int c = Search_Bin(L,h);
+    cout<<c;
+    return 0;
+}
+//1 2 3 4 5 6 7 8 9 10
