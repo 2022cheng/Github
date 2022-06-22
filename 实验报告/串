@@ -7,7 +7,7 @@
 #define OVERSIZE -1
 typedef int Status;
 typedef float ElemType;
-//-------穿的定长顺序储存结构------(静态分配)
+//-------串的定长顺序储存结构------(静态分配)
 #define MAXSIZE 255    //串的最大长度
 typedef struct{
     char ch[MAXSIZE+1];   //储存串的一维数组
